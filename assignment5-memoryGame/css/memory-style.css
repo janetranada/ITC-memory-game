@@ -98,7 +98,8 @@ main {
 }
 .front-face.catTheme{
     border-radius: 50%;
-    padding: 4px;
+    border: 4px solid black;
+    padding: 1px;
 }
 .back-face {
     background-size: contain;
@@ -129,7 +130,9 @@ main {
 
 /* You won overlay */
 #you-won-wrapper,
-#gameLevel-wrapper {
+#gameLevel-wrapper,
+#score-wrapper,
+#scoreboard-wrapper {
     position: fixed;
     top: 0;
     right: 0;
@@ -139,11 +142,16 @@ main {
     z-index: 12345;
     display: none;
 }
+#scoreboard-wrapper {
+    z-index: 123456;
+}
 #gameLevel-wrapper {
     display:block;
 }
 #you-won-container,
-#gameLevel-container {
+#gameLevel-container,
+#score-container,
+#scoreboard-container {
     width: 500px;
     height: 300px;
     background-color: #00818a;
@@ -158,9 +166,19 @@ main {
     justify-content: center;
     align-items: center;
 }
-.you-won-item {
+#scoreboard-container {
+    height: 360px;
+}
+
+.you-won-item,
+.score-item {
     font-size: 2rem;
     margin: 15px auto;
+}
+button.you-won-item,
+.score-item {
+    text-align: center;
+    font-size: 1.5rem;
 }
 .gameLevel-item {
     margin: 15px auto;
@@ -169,12 +187,17 @@ main {
 /* Buttons */
 #newgame-btn:hover,
 #you-won-newgame-btn:hover,
-#gameLevel-btn:hover {
+#you-won-save-btn:hover,
+#gameLevel-btn:hover,
+#scoreboard-save-btn:hover,
+#see-scoreboard-btn:hover,
+#exit-btn:hover {
     color: #fff;
     background-color:#dc3545;
     border-color:#dc3545;
     box-shadow: 0 0 0 0.2rem;
 }
+
 
 /* Media Screens */
 @media screen and (min-width: 2000px){

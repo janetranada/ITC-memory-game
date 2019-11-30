@@ -1,4 +1,3 @@
-
 let disableCards = false;
 let cardsOpened = [];
 let wrongGuesses = 0;
@@ -30,7 +29,6 @@ Create array of 16 cat images
     for (i = 0; i < 17; i++) {
         let cat = getCatImgs();
     }
-    console.log('cat array: ', catList);
 })();
 
 
@@ -57,7 +55,8 @@ let chooseGameLevel = `<section id="gameLevel-wrapper">
                                         <option id="hard" value="hard">HARD - 24 cards</option>
                                     </select>                                
                                 </form>
-                                <button id="gameLevel-btn" type="button" class="btn btn-warning btn-lg gameLevel-item">start game</button>                            
+                                <button id="gameLevel-btn" type="button" class="btn btn-warning btn-lg gameLevel-item">start game</button>
+                                <button id="see-scoreboard-btn" type="button" class="btn btn-dark btn-sm gameLevel-item">see score board</button>                           
                             </div>
                         </section>`
 
@@ -72,8 +71,19 @@ let infoContainer = `<section id="info-container" class="info-container">
                         </div>
                     </section>`;
 
+let scoreBoardModal = `<section id="scoreboard-wrapper">
+                            <div id="scoreboard-container"> 
+                                <h2>Top 3 Players</h2>            
+                                <div id="scoreboard-data" class="score-item"></div> 
+                                <div class="score-item">
+                                    <button id="exit-btn" type="button" class="btn btn-warning btn-lg">exit</button>
+                                </div> 
+                            </div>
+                        </section>`
+
 $mainContainer.append(chooseGameLevel);
 $mainContainer.append(infoContainer);
+$mainContainer.append(scoreBoardModal);
 
 /* --------------------------------
 Check chosen level num photo req't
@@ -104,13 +114,49 @@ document.getElementById("gameLevel-btn").addEventListener('click', function() {
         gameLevel = chosenLevel;
         gameTheme = chosenTheme;
         document.getElementById('gameLevel-wrapper').style.display = "none";
-        console.log(gameTheme, " : ", gameLevel);
         createGame();
     }
 });
 
+/* ----------------------
+See scoreboard
+------------------------*/
+let scoreBoardWrapper = document.getElementById('scoreboard-wrapper');
+let scoreBoardText = document.getElementById('scoreboard-data');
 
-function createGame() { //ends in line 326
+document.getElementById('see-scoreboard-btn').addEventListener('click', function() {
+    scoreBoardWrapper.style.display = "block";
+    let jsonScoresList = JSON.parse(localStorage.getItem("highScores")) || [];
+
+    if (jsonScoresList.length !== 0) {
+        for (i=0; i < jsonScoresList.length; i++) {
+            let topPlayerData = document.createElement('p');
+            scoreBoardText.append(topPlayerData);
+            topPlayerData.innerText = jsonScoresList[i].name + " : " + jsonScoresList[i].score;
+        }
+    } else {
+        let noPlayerData = document.createElement('p');
+        scoreBoardText.append(noPlayerData);
+        noPlayerData.innerText = "** No data **";
+    }
+});
+
+/* ----------------------
+Exit scoreboard
+------------------------*/
+let exitScoreBoard = document.getElementById('exit-btn');
+exitScoreBoard.addEventListener('click', function() {
+    while (scoreBoardText.hasChildNodes()) {  
+        scoreBoardText.removeChild(scoreBoardText.firstChild);
+    };
+    scoreBoardWrapper.style.display = "none";
+});
+
+
+/* --------------------------
+Start Game (ends in line 421)
+-----------------------------*/
+function createGame() {
     /* --------------------------------
     Populate front face based on theme
     -----------------------------------*/ 
@@ -143,7 +189,7 @@ function createGame() { //ends in line 326
     })();
 
     /* ---------------------------------
-    Get random img to use from img list
+    Get random img to use from img array
     ------------------------------------*/
     while (randomIndex.length < reqdNumPhotos){
         let randIndex = Math.floor(Math.random() * 16);
@@ -169,11 +215,29 @@ function createGame() { //ends in line 326
                                     </div>
                                     <div id="you-won-wrongGuesses" class="yon-won-item"></div>
                                     <button id="you-won-newgame-btn" type="button" class="btn btn-warning btn-lg you-won-item">new game</button>
+                                    <button id="you-won-save-btn" type="button" class="btn btn-dark btn-lg you-won-item">save score</button>
                                 </div>
                             </section>`
-
+    
+    let saveScore = `<section id="score-wrapper">
+                        <div id="score-container">            
+                            <div class="score-item">
+                                <label>Your name: 
+                                    <input id="username" type="text">
+                                </label>                
+                            </div>   
+                            <div class="score-item">Your wrong guesses:
+                                <span id="scoreboard-wrong"></span>
+                            </div>  
+                            <div class="score-item">
+                                <button id="scoreboard-save-btn" type="button" class="btn btn-warning btn-lg">save my score</button>
+                            </div> 
+                        </div>
+                    </section>`    
+    
     $mainContainer.append($gameboard);
     $mainContainer.append(youWonContainer);
+    $mainContainer.append(saveScore);
 
     for (let i = 0; i < (reqdNumPhotos * 2); i ++) {
         let $cardDiv = $('<div class="card unmatched"></div>').attr("id", "card" + (i+1));
@@ -207,6 +271,36 @@ function createGame() { //ends in line 326
     cardsArray.forEach(card => card.addEventListener('click', flipCard));
     document.getElementById("newgame-btn").addEventListener('click', () => location.reload());
     document.getElementById("you-won-newgame-btn").addEventListener('click', () => location.reload());
+    document.getElementById("you-won-save-btn").addEventListener('click', function() {
+        document.getElementById('you-won-wrapper').style.display = "none";
+        document.getElementById('score-wrapper').style.display = "block";
+    })
+   
+    /* ---------------------
+    Saving to local storage
+    ------------------------*/
+    const highscores = JSON.parse(localStorage.getItem("highScores")) || [];
+    const nameInput = document.getElementById('username');
+    let username = nameInput.value;
+        
+    nameInput.addEventListener("keyup", function() {
+        username = nameInput.value;
+    })
+
+    document.getElementById("scoreboard-save-btn").addEventListener('click', function(){
+        if (username !=="") {
+            const scoreObj = {
+                name: username,
+                score: wrongGuesses,            
+            }
+            highscores.push(scoreObj);
+            highscores.sort((a,b) => a.score - b.score);
+            highscores.splice(3);
+            localStorage.setItem("highScores", JSON.stringify(highscores));
+            document.getElementById('score-wrapper').style.display = "none";
+            location.reload();
+        }
+    })
 
     /* --------------------------------
     Shuffle cards (randomize position)
@@ -320,6 +414,7 @@ function createGame() { //ends in line 326
         let numCardsOpened = cardsOpened.length;
         if (numCardsOpened === (reqdNumPhotos * 2)) {        
             $('#you-won-wrongGuesses').html(wrongGuesses); 
+            $('#scoreboard-wrong').html(wrongGuesses); 
             setTimeout(() => document.getElementById('you-won-wrapper').style.display = "block", 1500);
         }
     }
