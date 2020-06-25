@@ -305,12 +305,13 @@ function createGame() {
     /* --------------------------------
     Shuffle cards (randomize position)
     -----------------------------------*/
-    (function shuffleCards() {
+    let shuffleCards = () => {
         cardsArray.forEach(card => {
-            let randomPosition = Math.floor(Math.random() * 12);
+            let randomPosition = Math.floor(Math.random() * reqdNumPhotos * 2);
             card.style.order = randomPosition;
         })
-    })();
+    };
+    shuffleCards();
 
     /* -----------------------------
     Flip selected cards
